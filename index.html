@@ -991,23 +991,22 @@
       nextBtn.disabled = true;
       nextBtn.textContent = "Đang gửi...";
 
-      const payload = {
-        name: state.name.trim(),
-        phone: state.phone.replace(/\s+/g, ""),
-        goal: state.goal,
-        freebies: state.freebies,
-        referral: state.referral,
-        school: state.school || "",
-        notes: state.notes || "",
-      };
+const payload = {
+  name: state.name.trim(),
+  phone: state.phone.replace(/\s+/g, ""),
+  goal: state.goal,
+  freebies: JSON.stringify(state.freebies),
+  referral: state.referral,
+  school: state.school || "",
+  notes: state.notes || "",
+};
 
-      fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      })
+const formData = new URLSearchParams(payload);
+
+fetch(API_URL, {
+  method: "POST",
+  body: formData,  // No JSON header!
+})
         .then((res) => res.json())
         .then((data) => {
           const formSection = document.getElementById("form-section");
