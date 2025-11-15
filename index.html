@@ -72,7 +72,28 @@
     .success-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
     .success-text { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
     .tiny-footer { margin-top: 10px; font-size: 10px; color: #9ca3af; text-align: center; }
-  </style>
+    .music-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: #fff;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      font-size: 24px;
+      z-index: 100;
+      transition: transform .15s ease, background .25s ease;
+      user-select: none;
+    }
+    .music-btn.playing { background: var(--accent); }
+    .music-btn:hover { transform: scale(1.07); }
+ </style>
 </head>
 <body>
   <div class="app">
@@ -117,6 +138,11 @@
       </div>
     </div>
   </div>
+
+  <div id="music-toggle" class="music-btn" title="Nhạc nền">🎵</div>
+  <audio id="bg-audio" preload="auto" loop>
+    <source src="assets/music.mp3" type="audio/mpeg" />
+  </audio>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzulNomDfWL7zDbB-XguK_o7pXRbU_jLw-YjnHDEvDme0qH5LvclNdRDozujNSNJ7u9_g/exec";
@@ -557,6 +583,62 @@
           alert("Không kết nối được. Bạn kiểm tra mạng hoặc báo cho thầy/cô nha.");
         });
     }
+
+   document.addEventListener("DOMContentLoaded", () => {
+      // ...existing code...
+      const musicToggle = document.getElementById("music-toggle");
+      const bgAudio = document.getElementById("bg-audio");
+      let musicStarted = false;
+
+      function safePlay() {
+        bgAudio.volume = 0.55;
+        bgAudio.play()
+          .then(() => {
+            musicStarted = true;
+            musicToggle.classList.add("playing");
+          })
+          .catch(() => {});
+      }
+
+      // Try autoplay immediately, fall back to first user interaction if blocked
+      function attemptAutoPlay() {
+        bgAudio.volume = 0.55;
+        bgAudio.play()
+          .then(() => {
+            musicStarted = true;
+            musicToggle.classList.add("playing");
+          })
+          .catch(() => {
+            const startOnFirstInteraction = () => {
+              if (!musicStarted) safePlay();
+            };
+            window.addEventListener("pointerdown", startOnFirstInteraction, { once: true });
+            window.addEventListener("keydown", startOnFirstInteraction, { once: true });
+            window.addEventListener("touchstart", startOnFirstInteraction, { once: true });
+          });
+      }
+      attemptAutoPlay();
+
+      musicToggle.addEventListener("click", () => {
+        if (!musicStarted) {
+          safePlay();
+          return;
+        }
+        if (bgAudio.paused) {
+          bgAudio.play().then(() => musicToggle.classList.add("playing"));
+        } else {
+          bgAudio.pause();
+          musicToggle.classList.remove("playing");
+        }
+      });
+
+      const startBtn = document.getElementById("start-btn");
+      startBtn.addEventListener("click", () => {
+        if (!musicStarted) safePlay();
+      });
+    });
+  
+  
   </script>
 </body>
 </html>
