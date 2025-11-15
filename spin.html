@@ -21,6 +21,8 @@
       --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.08);
     }
 
+
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -432,6 +434,28 @@
       cursor: pointer;
       padding: 0 2px;
     }
+    .music-toggle {
+      position: fixed;
+      bottom: 54px;
+      right: 10px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(15,23,42,0.15);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 15;
+      transition: background .2s, transform .15s;
+    }
+    .music-toggle.playing { background: var(--primary); }
+    .music-toggle:hover { transform: scale(1.07); }
+
   </style>
 </head>
 <body>
@@ -506,6 +530,14 @@
       </div>
     </div>
   </div>
+
+  <button id="music-toggle" class="music-toggle" title="Nhạc nền">🎵</button>
+  <audio id="bg-audio" preload="auto" loop playsinline>
+    <source src="assets/music.mp3" type="audio/mpeg" />
+  </audio>
+  <audio id="win-audio" preload="auto" playsinline>
+    <source src="assets/win.mp3" type="audio/mpeg" />
+  </audio>
 
   <script>
     // ===== CONSTANTS =====
@@ -855,6 +887,75 @@
 
         prizes = newPrizes;
       }
+    }
+
+    function showResult(winner, resultBox) {
+      resultBox.innerHTML = `
+        <div class="result-title">🎉 Chúc mừng! 🎉</div>
+        <div class="result-text">Bạn nhận được:</div>
+        <div class="result-highlight">${winner.emoji} ${winner.label}</div>
+        <div class="result-text" style="margin-top:4px;font-size:12px;color:#6b7280;">
+          Thầy/cô bấm quay lại lần nữa cho bạn kế tiếp.
+        </div>
+      `;
+      // Play win sound
+      const winAudio = document.getElementById("win-audio");
+      if (winAudio) {
+        winAudio.currentTime = 0;
+        winAudio.play().catch(()=>{});
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      // ...existing setup calls...
+      setupMusic();
+    });
+
+    function setupMusic() {
+      const toggle = document.getElementById("music-toggle");
+      const bg = document.getElementById("bg-audio");
+      if (!bg || !toggle) return;
+      let started = false;
+
+      function markPlaying() {
+        toggle.classList.add("playing");
+        toggle.textContent = "🔊";
+      }
+      function markPaused() {
+        toggle.classList.remove("playing");
+        toggle.textContent = "🎵";
+      }
+
+      function tryAutoPlay() {
+        bg.volume = 0.45;
+        bg.play()
+          .then(() => { started = true; markPlaying(); })
+          .catch(() => {
+            // Wait for first interaction
+            const onceStart = () => {
+              if (!started) {
+                bg.play().then(()=>{ started = true; markPlaying(); });
+              }
+              window.removeEventListener("pointerdown", onceStart);
+              window.removeEventListener("keydown", onceStart);
+              window.removeEventListener("touchstart", onceStart);
+            };
+            window.addEventListener("pointerdown", onceStart, { once: true });
+            window.addEventListener("keydown", onceStart, { once: true });
+            window.addEventListener("touchstart", onceStart, { once: true });
+          });
+      }
+
+      tryAutoPlay();
+
+      toggle.addEventListener("click", () => {
+        if (bg.paused) {
+          bg.play().then(()=>{ started = true; markPlaying(); }).catch(()=>{});
+        } else {
+          bg.pause();
+          markPaused();
+        }
+      });
     }
   </script>
 </body>
