@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini Game IELTS - Đăng ký nhận quà 🎁</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #ffe5f1, #e0f2ff);
+      --card-bg: #ffffff;
+      --primary: #ff69b4;
+      --primary-dark: #f04494;
+      --accent: #7c3aed;
+      --text-main: #222;
+      --text-muted: #666;
+      --border-radius-lg: 24px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      color: var(--text-main);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-inner {
+      padding: 20px 20px 24px;
+    }
+
+    /* Intro section with school image */
+    .intro {
+      position: relative;
+      height: 240px;
+      overflow: hidden;
+    }
+
+    .intro img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: center center;
+    }
+
+    .intro-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 16px 20px;
+      color: #fff;
+    }
+
+    .intro-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .intro-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.55);
+    }
+
+    .intro-subtitle {
+      font-size: 13px;
+      margin-top: 4px;
+      opacity: 0.9;
+    }
+
+    .intro-cta {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      color: #111827;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .intro-cta span {
+      margin-left: 6px;
+    }
+
+    .intro-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 35px rgba(0,0,0,0.28);
+    }
+
+    .intro-cta:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+    }
+
+    /* Form content */
+    .stepper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+      margin-top: 8px;
+      gap: 6px;
+    }
+
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      position: relative;
+    }
+
+    .step-dot.active {
+      background: var(--primary);
+      transform: scale(1.2);
+    }
+
+    .step-dot.completed::after {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 105, 180, 0.4);
+    }
+
+    .question-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #f1f5f9;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .question-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .question-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .input-text {
+      width: 100%;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      background: #f9fafb;
+    }
+
+    .input-text:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(255, 105, 180, 0.28);
+      background: #fff;
+    }
+
+    .error-text {
+      font-size: 12px;
+      color: #dc2626;
+      margin-top: 4px;
+    }
+
+    .radio-group,
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .chip span.icon {
+      font-size: 16px;
+    }
+
+    .chip.active {
+      background: #fdf2ff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(255,105,180,0.16);
+      transform: translateY(-1px);
+    }
+
+    .chip input {
+      display: none;
+    }
+
+    .chip-label-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .chip-title {
+      font-weight: 600;
+    }
+
+    .chip-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      gap: 12px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(255,105,180,0.35);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 16px 40px rgba(255,105,180,0.45);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 8px 22px rgba(255,105,180,0.25);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      padding-inline: 6px;
+      box-shadow: none;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .status-line {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-line .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    .status-line.error .dot {
+      background: #ef4444;
+    }
+
+    .status-line.warn .dot {
+      background: #f59e0b;
+    }
+
+    /* Success screen */
+    .success-screen {
+      text-align: center;
+      padding: 20px 10px 6px;
+    }
+
+    .success-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      color: #166534;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .success-emoji {
+      font-size: 40px;
+      margin-bottom: 8px;
+    }
+
+    .success-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .success-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .success-subtext {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .tiny-footer {
+      margin-top: 10px;
+      font-size: 10px;
+      color: #9ca3af;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .intro {
+        height: 210px;
+      }
+      .intro-title {
+        font-size: 18px;
+      }
+      .card-inner {
+        padding: 18px 16px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <!-- Intro section -->
+      <div class="intro" id="intro-section">
+        <img
+          id="school-image"
+          src="https://dongphucgiadinh.com/wp-content/uploads/2022/09/dong-phuc-truong-vo-van-kiet-8.jpg"
+          alt="Trường THPT"
+        />
+        <div class="intro-overlay">
+          <div class="intro-badge">
+            <span>🧠 IELTS Center</span>
+            <span>•</span>
+            <span>Mini game tại trường</span>
+          </div>
+          <div class="intro-title">
+            Điền nhanh 30s, nhận quà IELTS siêu xịn 🎁
+          </div>
+          <div class="intro-subtitle">
+            Dành riêng cho học sinh trường hôm nay. Quà tặng: tài liệu PDF, mini test, học thử & voucher học phí.
+          </div>
+          <button class="intro-cta" id="start-btn">
+            Bắt đầu ngay
+            <span>👉</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Form / steps -->
+      <div class="card-inner" id="form-section" style="display:none;">
+        <div class="stepper" id="stepper"></div>
+
+        <div id="step-container"></div>
+
+        <div class="actions">
+          <button class="btn btn-ghost" id="prev-btn" style="visibility:hidden;">
+            ⬅ Quay lại
+          </button>
+          <div style="flex:1;"></div>
+          <button class="btn btn-primary" id="next-btn">
+            Tiếp tục ➜
+          </button>
+        </div>
+
+        <div class="tiny-footer">
+          💡 Thông tin chỉ dùng cho chương trình tư vấn học tập & ưu đãi IELTS. Không spam, không chia sẻ ra ngoài.
+        </div>
+      </div>
+
+      <!-- Success screen -->
+      <div class="card-inner" id="success-section" style="display:none;">
+        <div class="success-screen">
+          <div class="success-emoji">🩷</div>
+          <div class="success-title">Hoàn tất rồi, cảm ơn bạn! 🎉</div>
+          <p class="success-text">
+            Thầy/cô bên trung tâm sẽ dựa vào thông tin bạn chọn để gửi đúng quà:
+            tài liệu, mini test hoặc buổi học thử phù hợp.
+          </p>
+          <p class="success-subtext">
+            Đừng quên ghé lại bàn tư vấn để tham gia trò chơi / quay số nhé!
+          </p>
+
+          <div class="success-badge" id="success-extra-badge">
+            <span>📱</span> Nhớ giữ điện thoại để nhận quà trên Zalo nha.
+          </div>
+
+          <button class="btn btn-primary" id="restart-btn" style="margin-top:12px;">
+            Gửi thêm cho bạn khác 👯
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===============================
+    // CONFIG
+    // ===============================
+    const API_URL = "https://script.google.com/macros/s/AKfycby4Wci7mwTJlxO7venwHdSExHcvDdVoZ-b-CzMPeF7rmkIWsAn3q8maa3xerdqw1SDseA/exec"; 
+    // TODO: replace with your real Apps Script URL, e.g.
+    // const API_URL = "https://script.google.com/macros/s/AKfyc.../exec";
+
+    const TOTAL_STEPS = 5;
+
+    const state = {
+      currentStep: 1,
+      name: "",
+      phone: "",
+      goal: "",        // co_chac_chan | co_dang_suy_nghi | chua | khong
+      freebies: [],    // array
+      referral: "",    // yes | no
+      school: "",      // optional: can set your school name if fixed
+      notes: "",
+      isSubmitting: false,
+    };
+
+    // ===============================
+    // INIT
+    // ===============================
+    document.addEventListener("DOMContentLoaded", () => {
+      const startBtn = document.getElementById("start-btn");
+      const introSection = document.getElementById("intro-section");
+      const formSection = document.getElementById("form-section");
+      const successSection = document.getElementById("success-section");
+      const nextBtn = document.getElementById("next-btn");
+      const prevBtn = document.getElementById("prev-btn");
+      const restartBtn = document.getElementById("restart-btn");
+
+      renderStepper();
+      renderStep();
+
+      startBtn.addEventListener("click", () => {
+        animateIntroOut(() => {
+          introSection.style.display = "none";
+          formSection.style.display = "block";
+          animateFormIn();
+        });
+      });
+
+      nextBtn.addEventListener("click", handleNext);
+      prevBtn.addEventListener("click", handlePrev);
+
+      restartBtn.addEventListener("click", () => {
+        // reset everything
+        state.currentStep = 1;
+        state.name = "";
+        state.phone = "";
+        state.goal = "";
+        state.freebies = [];
+        state.referral = "";
+        state.isSubmitting = false;
+
+        document.getElementById("step-container").innerHTML = "";
+        renderStepper();
+        renderStep();
+
+        successSection.style.display = "none";
+        formSection.style.display = "block";
+        animateFormIn();
+      });
+    });
+
+    // ===============================
+    // ANIMATIONS
+    // ===============================
+    function animateIntroOut(onComplete) {
+      const img = document.getElementById("school-image");
+      const overlay = document.querySelector(".intro-overlay");
+
+      if (window.gsap) {
+        gsap.to(img, {
+          scale: 1.2,
+          opacity: 0,
+          duration: 0.6,
+          ease: "power2.inOut",
+        });
+        gsap.to(overlay, {
+          y: 30,
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.inOut",
+          onComplete,
+        });
+      } else {
+        onComplete();
+      }
+    }
+
+    function animateFormIn() {
+      const formSection = document.getElementById("form-section");
+      if (window.gsap) {
+        gsap.fromTo(
+          formSection,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }
+        );
+      }
+    }
+
+    function animateStepChange() {
+      const stepContainer = document.getElementById("step-container");
+      if (window.gsap) {
+        gsap.fromTo(
+          stepContainer,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }
+        );
+      }
+    }
+
+    function fireSuccessConfetti() {
+      if (window.confetti) {
+        const duration = 1500;
+        const end = Date.now() + duration;
+
+        (function frame() {
+          confetti({
+            particleCount: 4,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+          });
+          confetti({
+            particleCount: 4,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+          });
+
+          if (Date.now() < end) {
+            requestAnimationFrame(frame);
+          }
+        })();
+      }
+    }
+
+    // ===============================
+    // STEPPER
+    // ===============================
+    function renderStepper() {
+      const stepper = document.getElementById("stepper");
+      stepper.innerHTML = "";
+      for (let i = 1; i <= TOTAL_STEPS; i++) {
+        const dot = document.createElement("div");
+        dot.className = "step-dot";
+        if (i === state.currentStep) {
+          dot.classList.add("active");
+        } else if (i < state.currentStep) {
+          dot.classList.add("completed");
+        }
+        stepper.appendChild(dot);
+      }
+    }
+
+    // ===============================
+    // STEPS RENDER
+    // ===============================
+    function renderStep(errorMsg) {
+      const container = document.getElementById("step-container");
+      container.innerHTML = "";
+
+      const wrapper = document.createElement("div");
+
+      const qTag = document.createElement("div");
+      qTag.className = "question-tag";
+      qTag.innerHTML = `✨ Câu hỏi ${state.currentStep}/${TOTAL_STEPS}`;
+      wrapper.appendChild(qTag);
+
+      let title = "";
+      let desc = "";
+
+      if (state.currentStep === 1) {
+        title = "1) Tên của bạn là gì? 🧑‍🎓";
+        desc = "Cứ ghi tên thường ngày mọi người gọi bạn nhé.";
+        wrapper.appendChild(renderQuestionHeader(title, desc));
+
+        const field = document.createElement("div");
+        field.className = "field";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "input-text";
+        input.placeholder = "VD: Nguyễn Minh Anh";
+        input.value = state.name;
+        input.autocomplete = "name";
+        input.addEventListener("input", (e) => {
+          state.name = e.target.value;
+        });
+
+        field.appendChild(input);
+        if (errorMsg) {
+          field.appendChild(renderError(errorMsg));
+        }
+
+        wrapper.appendChild(field);
+      }
+
+      if (state.currentStep === 2) {
+        title = "2) Số điện thoại / Zalo của bạn là gì? 📱";
+        desc = "Để gửi bộ tài liệu IELTS + mini test sau chương trình nha ❤️";
+        wrapper.appendChild(renderQuestionHeader(title, desc));
+
+        const field = document.createElement("div");
+        field.className = "field";
+
+        const input = document.createElement("input");
+        input.type = "tel";
+        input.className = "input-text";
+        input.placeholder = "VD: 0901 234 567";
+        input.value = state.phone;
+        input.autocomplete = "tel";
+        input.addEventListener("input", (e) => {
+          state.phone = e.target.value;
+        });
+
+        field.appendChild(input);
+        if (errorMsg) {
+          field.appendChild(renderError(errorMsg));
+        } else {
+          const hint = document.createElement("div");
+          hint.className = "error-text";
+          hint.style.color = "#6b7280";
+          hint.textContent = "Lưu ý: ưu tiên số đang dùng Zalo nhé.";
+          field.appendChild(hint);
+        }
+
+        wrapper.appendChild(field);
+      }
+
+      if (state.currentStep === 3) {
+        title = "3) Bạn có mục tiêu học IELTS không? 🎯";
+        desc = "Chỉ 1 câu nhưng giúp tụi mình tư vấn đúng hơn cho bạn.";
+        wrapper.appendChild(renderQuestionHeader(title, desc));
+
+        const group = document.createElement("div");
+        group.className = "radio-group";
+
+        const options = [
+          {
+            value: "co_chac_chan",
+            icon: "🔥",
+            title: "Có, chắc chắn",
+            sub: "Đặt mục tiêu rõ ràng, muốn thi IELTS.",
+          },
+          {
+            value: "co_dang_suy_nghi",
+            icon: "💭",
+            title: "Có, đang suy nghĩ",
+            sub: "Muốn tìm hiểu thêm rồi quyết định sau.",
+          },
+          {
+            value: "chua",
+            icon: "🤔",
+            title: "Chưa",
+            sub: "Chưa tìm hiểu nhiều về IELTS.",
+          },
+          {
+            value: "khong",
+            icon: "🙅‍♀️",
+            title: "Không",
+            sub: "Không có ý định học/thi IELTS.",
+          },
+        ];
+
+        options.forEach((opt) => {
+          const label = document.createElement("label");
+          label.className = "chip";
+          if (state.goal === opt.value) label.classList.add("active");
+
+          label.innerHTML = `
+            <span class="icon">${opt.icon}</span>
+            <div class="chip-label-text">
+              <span class="chip-title">${opt.title}</span>
+              <span class="chip-sub">${opt.sub}</span>
+            </div>
+          `;
+
+          label.addEventListener("click", () => {
+            state.goal = opt.value;
+            renderStep();
+            renderStepper();
+          });
+
+          group.appendChild(label);
+        });
+
+        if (errorMsg) {
+          group.appendChild(renderError(errorMsg));
+        }
+
+        wrapper.appendChild(group);
+      }
+
+      if (state.currentStep === 4) {
+        title = "4) Hôm nay bạn muốn nhận gì miễn phí? 🎁";
+        desc = "Có thể chọn nhiều mục cùng lúc nha.";
+        wrapper.appendChild(renderQuestionHeader(title, desc));
+
+        const info = document.createElement("div");
+        info.className = "question-desc";
+        info.style.fontSize = "12px";
+        info.style.color = "#6b7280";
+        info.innerHTML = `Nếu bạn đã chọn <b>"Không"</b> ở câu trước, bạn có thể bỏ qua bước này cũng được.`;
+        wrapper.appendChild(info);
+
+        const group = document.createElement("div");
+        group.className = "checkbox-group";
+
+        const options = [
+          { value: "tai_lieu_pdf", icon: "📚", title: "Bộ tài liệu IELTS PDF", sub: "Tổng hợp dạng bài + tips." },
+          { value: "mini_test", icon: "📝", title: "1 bài test thử", sub: "Biết trình độ hiện tại của bạn." },
+          { value: "hoc_thu", icon: "🎧", title: "1 buổi học thử", sub: "Học thử cùng giáo viên để trải nghiệm." },
+          { value: "voucher", icon: "🎫", title: "Voucher học phí", sub: "Giảm chi phí nếu bạn học thật." },
+          { value: "xem_thu", icon: "👀", title: "Chưa cần, mình xem thử thôi", sub: "Mới tìm hiểu nhẹ nhàng thôi." },
+        ];
+
+        options.forEach((opt) => {
+          const label = document.createElement("label");
+          label.className = "chip";
+          if (state.freebies.includes(opt.value)) label.classList.add("active");
+
+          label.innerHTML = `
+            <span class="icon">${opt.icon}</span>
+            <div class="chip-label-text">
+              <span class="chip-title">${opt.title}</span>
+              <span class="chip-sub">${opt.sub}</span>
+            </div>
+          `;
+
+          label.addEventListener("click", () => {
+            toggleFreebie(opt.value);
+            renderStep();
+          });
+
+          group.appendChild(label);
+        });
+
+        wrapper.appendChild(group);
+      }
+
+      if (state.currentStep === 5) {
+        title = "5) Bạn có sẵn sàng nhận 500k khi giới thiệu bạn bè học chung IELTS không? 💸";
+        desc = "Trung tâm sẽ có chính sách giới thiệu bạn bè rõ ràng & minh bạch nha.";
+        wrapper.appendChild(renderQuestionHeader(title, desc));
+
+        const group = document.createElement("div");
+        group.className = "radio-group";
+
+        const options = [
+          {
+            value: "yes",
+            icon: "😍",
+            title: "Có chứ, nghe hấp dẫn đó!",
+            sub: "Nếu chương trình ổn mình sẵn sàng rủ bạn.",
+          },
+          {
+            value: "no",
+            icon: "😅",
+            title: "Chắc chưa, để xem đã...",
+            sub: "Muốn trải nghiệm trước rồi mới giới thiệu.",
+          },
+        ];
+
+        options.forEach((opt) => {
+          const label = document.createElement("label");
+          label.className = "chip";
+          if (state.referral === opt.value) label.classList.add("active");
+
+          label.innerHTML = `
+            <span class="icon">${opt.icon}</span>
+            <div class="chip-label-text">
+              <span class="chip-title">${opt.title}</span>
+              <span class="chip-sub">${opt.sub}</span>
+            </div>
+          `;
+
+          label.addEventListener("click", () => {
+            state.referral = opt.value;
+            renderStep();
+          });
+
+          group.appendChild(label);
+        });
+
+        if (errorMsg) {
+          group.appendChild(renderError(errorMsg));
+        }
+
+        wrapper.appendChild(group);
+      }
+
+      container.appendChild(wrapper);
+      animateStepChange();
+
+      // Update buttons text & visibility
+      const prevBtn = document.getElementById("prev-btn");
+      const nextBtn = document.getElementById("next-btn");
+
+      prevBtn.style.visibility = state.currentStep === 1 ? "hidden" : "visible";
+      if (state.currentStep === TOTAL_STEPS) {
+        nextBtn.textContent = "Gửi thông tin ✅";
+      } else {
+        nextBtn.textContent = "Tiếp tục ➜";
+      }
+    }
+
+    function renderQuestionHeader(title, desc) {
+      const frag = document.createElement("div");
+      const h = document.createElement("div");
+      h.className = "question-title";
+      h.textContent = title;
+
+      const p = document.createElement("div");
+      p.className = "question-desc";
+      p.textContent = desc;
+
+      frag.appendChild(h);
+      frag.appendChild(p);
+      return frag;
+    }
+
+    function renderError(msg) {
+      const err = document.createElement("div");
+      err.className = "error-text";
+      err.textContent = msg;
+      return err;
+    }
+
+    function toggleFreebie(value) {
+      const idx = state.freebies.indexOf(value);
+      if (idx === -1) {
+        state.freebies.push(value);
+      } else {
+        state.freebies.splice(idx, 1);
+      }
+    }
+
+    // ===============================
+    // NAVIGATION
+    // ===============================
+    function handleNext() {
+      const error = validateCurrentStep();
+      if (error) {
+        renderStep(error);
+        return;
+      }
+
+      if (state.currentStep === TOTAL_STEPS) {
+        submitForm();
+        return;
+      }
+
+      state.currentStep++;
+      renderStepper();
+      renderStep();
+    }
+
+    function handlePrev() {
+      if (state.currentStep === 1) return;
+      state.currentStep--;
+      renderStepper();
+      renderStep();
+    }
+
+    // ===============================
+    // VALIDATION
+    // ===============================
+    function validateCurrentStep() {
+      if (state.currentStep === 1) {
+        if (!state.name.trim()) return "Bạn vui lòng cho tụi mình biết tên nhé.";
+      }
+      if (state.currentStep === 2) {
+        if (!state.phone.trim()) return "Bạn vui lòng nhập số điện thoại/Zalo nhé.";
+        const cleaned = state.phone.replace(/\s+/g, "");
+        const vnPhoneRegex = /^(0|\+84)(3|5|7|8|9)[0-9]{8}$/;
+        if (!vnPhoneRegex.test(cleaned)) {
+          return "Số điện thoại có vẻ chưa đúng. Bạn thử kiểm tra lại nhé.";
+        }
+      }
+      if (state.currentStep === 3) {
+        if (!state.goal) return "Bạn chọn giúp tụi mình 1 đáp án nha.";
+      }
+      if (state.currentStep === 5) {
+        if (!state.referral && state.goal !== "khong") {
+          return "Bạn chọn 1 đáp án để tụi mình dễ tư vấn hơn nhé.";
+        }
+      }
+      return null;
+    }
+
+    // ===============================
+    // SUBMIT FORM
+    // ===============================
+    function submitForm() {
+      if (state.isSubmitting) return;
+      state.isSubmitting = true;
+
+      const nextBtn = document.getElementById("next-btn");
+      nextBtn.disabled = true;
+      nextBtn.textContent = "Đang gửi...";
+
+      const payload = {
+        name: state.name.trim(),
+        phone: state.phone.replace(/\s+/g, ""),
+        goal: state.goal,
+        freebies: state.freebies,
+        referral: state.referral,
+        school: state.school || "",
+        notes: state.notes || "",
+      };
+
+      fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const formSection = document.getElementById("form-section");
+          const successSection = document.getElementById("success-section");
+
+          if (data.status === "ok") {
+            formSection.style.display = "none";
+            successSection.style.display = "block";
+            fireSuccessConfetti();
+          } else if (data.status === "duplicate") {
+            state.isSubmitting = false;
+            nextBtn.disabled = false;
+            nextBtn.textContent = "Gửi thông tin ✅";
+            alert("Số điện thoại này đã được đăng ký rồi nha. Bạn có thể dùng số khác hoặc kiểm tra lại.");
+          } else {
+            state.isSubmitting = false;
+            nextBtn.disabled = false;
+            nextBtn.textContent = "Gửi thông tin ✅";
+            alert("Có lỗi xảy ra khi gửi thông tin. Bạn thử lại giúp tụi mình nhé!");
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          state.isSubmitting = false;
+          nextBtn.disabled = false;
+          nextBtn.textContent = "Gửi thông tin ✅";
+          alert("Không kết nối được tới máy chủ. Bạn thử kiểm tra mạng hoặc báo cho thầy/cô nha.");
+        });
+    }
+  </script>
+</body>
+</html>
