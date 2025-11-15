@@ -83,7 +83,6 @@
       display: none;
     }
 
-    /* Roulette area */
     .roulette-wrapper {
       margin-top: 12px;
       display: flex;
@@ -111,7 +110,7 @@
     }
 
     .roulette-item {
-      height: 100px;      /* fixed row height */
+      height: 100px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -136,17 +135,17 @@
     }
 
     .roulette-center-badge {
-        position: absolute;
-    left: 68px;
-    top: 52%;
-    transform: translate(-50%, -80%);
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.85);
-    color: #f9fafb;
-    font-size: 11px;
-    pointer-events: none;
-    display: none;
+      position: absolute;
+      left: 68px;
+      top: 52%;
+      transform: translate(-50%, -80%);
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.85);
+      color: #f9fafb;
+      font-size: 11px;
+      pointer-events: none;
+      display: none;
     }
 
     .action-btn {
@@ -214,7 +213,6 @@
       color: #9ca3af;
     }
 
-    /* Password lock screen */
     .lock-overlay {
       position: fixed;
       inset: 0;
@@ -297,7 +295,6 @@
       background: var(--primary-dark);
     }
 
-    /* Hidden settings trigger */
     .settings-trigger {
       position: fixed;
       bottom: 10px;
@@ -327,7 +324,6 @@
       transform: translateY(1px) scale(0.95);
     }
 
-    /* Settings modal */
     .settings-overlay {
       position: fixed;
       inset: 0;
@@ -467,15 +463,11 @@
         <div class="result-title">Kết quả sẽ hiện ở đây 👇</div>
         <div class="result-text">Sau khi dừng, bạn đọc giải cho học sinh và trao quà.</div>
       </div>
-
-      
     </div>
   </div>
 
-  <!-- Hidden settings trigger -->
   <button class="settings-trigger" id="settings-trigger" title="Admin settings">⚙️</button>
 
-  <!-- Lock screen -->
   <div class="lock-overlay" id="lock-overlay">
     <div class="lock-box">
       <div class="lock-emoji">🔐</div>
@@ -491,7 +483,6 @@
     </div>
   </div>
 
-  <!-- Settings modal -->
   <div class="settings-overlay" id="settings-overlay">
     <div class="settings-modal">
       <div class="settings-header">
@@ -503,6 +494,7 @@
       <div class="settings-body">
         <div style="font-size: 11px; color:#6b7280; margin-bottom:6px;">
           • Chỉnh tên giải, emoji, bật/tắt, hoặc đánh dấu <b>“chỉ hiển thị, không bao giờ trúng”</b>.<br/>
+          • Tick <b>Ưu tiên</b> để tăng xác suất trúng (x3).<br/>
           • Cấu hình lưu ở <b>localStorage</b> trên máy này.
         </div>
         <div id="settings-items"></div>
@@ -519,24 +511,25 @@
     // ===== CONSTANTS =====
     const SECRET_CODES = [50, 52, 54, 56]; // "2468"
     const STORAGE_KEY = "text_roulette_prizes_v_final";
-    const ROW_HEIGHT = 100;        // must match .roulette-item height
-    const CENTER_ROW_INDEX = 1;    // middle row (0,1,2) → index 1
+    const ROW_HEIGHT = 100;
+    const CENTER_ROW_INDEX = 1;
+    const BOOST_MULTIPLIER = 3; // Trọng số khi boost=true
 
     function getSecretPassword() {
       return SECRET_CODES.map(c => String.fromCharCode(c)).join("");
     }
 
     const DEFAULT_PRIZES = [
-      { id: "1",  label: "Thùng rác mini",            emoji: "🗑", active: true, displayOnly: true },
-      { id: "2",  label: "Bình nước",                 emoji: "🥤", active: true, displayOnly: true },
-      { id: "3",  label: "Khăn giấy",                 emoji: "🧻", active: true, displayOnly: false },
-      { id: "4",  label: "Bút chì khổng lồ",          emoji: "✏️", active: true, displayOnly: true },
-      { id: "5",  label: "Snack",                     emoji: "🍪", active: true, displayOnly: false },
-      { id: "6",  label: "Kẹo mút",                   emoji: "🍭", active: true, displayOnly: false },
-      { id: "7",  label: "Bộ tài liệu IELTS",         emoji: "📚", active: true, displayOnly: false },
-      { id: "8",  label: "Voucher test năng lực",     emoji: "🎫", active: true, displayOnly: false },
-      { id: "9",  label: "Hát 1 bài hát",             emoji: "🎤", active: true, displayOnly: false },
-      { id: "10", label: "Nói một câu bằng tiếng Anh", emoji: "🗣️", active: true, displayOnly: false }
+      { id: "1",  label: "Thùng rác mini",            emoji: "🗑", active: true, displayOnly: true,  boost: false },
+      { id: "2",  label: "Bình nước",                 emoji: "🥤", active: true, displayOnly: true,  boost: false },
+      { id: "3",  label: "Khăn giấy",                 emoji: "🧻", active: true, displayOnly: false, boost: false },
+      { id: "4",  label: "Bút chì khổng lồ",          emoji: "✏️", active: true, displayOnly: true,  boost: false },
+      { id: "5",  label: "Snack",                     emoji: "🍪", active: true, displayOnly: false, boost: true  },
+      { id: "6",  label: "Kẹo mút",                   emoji: "🍭", active: true, displayOnly: false, boost: false },
+      { id: "7",  label: "Bộ tài liệu IELTS",         emoji: "📚", active: true, displayOnly: false, boost: false },
+      { id: "8",  label: "Voucher test năng lực",     emoji: "🎫", active: true, displayOnly: false, boost: false },
+      { id: "9",  label: "Hát 1 bài hát",             emoji: "🎤", active: true, displayOnly: false, boost: false },
+      { id: "10", label: "Nói một câu bằng tiếng Anh", emoji: "🗣️", active: true, displayOnly: false, boost: false }
     ];
 
     let prizes = [];
@@ -561,16 +554,12 @@
         const expected = getSecretPassword();
         if (input.value.trim() === expected) {
           error.textContent = "";
-          if (window.gsap) {
-            gsap.to(overlay, {
+            gsap?.to(overlay, {
               opacity: 0,
               duration: 0.35,
               ease: "power2.out",
               onComplete: () => overlay.style.display = "none"
-            });
-          } else {
-            overlay.style.display = "none";
-          }
+            }) ?? (overlay.style.display = "none");
         } else {
           error.textContent = "Sai mật khẩu, thử lại nhé!";
           input.value = "";
@@ -594,7 +583,8 @@
         }
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length) {
-          prizes = parsed;
+          // Bổ sung boost nếu chưa có trong dữ liệu cũ
+            prizes = parsed.map(p => ({ ...p, boost: p.boost || false }));
         } else {
           prizes = DEFAULT_PRIZES.map(p => ({ ...p }));
         }
@@ -624,7 +614,7 @@
       });
     }
 
-    // ===== ROLL BUTTON =====
+    // ===== START BUTTON =====
     function setupStartButton() {
       const btn = document.getElementById("start-btn");
       btn.addEventListener("click", () => {
@@ -636,9 +626,21 @@
           alert("Hiện không có item nào có thể trúng.\nBạn vào phần cài đặt để bật lại.");
           return;
         }
-        const winner = winnable[Math.floor(Math.random() * winnable.length)];
+        const winner = pickWeightedWinner(winnable);
         runRouletteAnimation(winner, active);
       });
+    }
+
+    // ===== WEIGHTED PICK =====
+    function pickWeightedWinner(list) {
+      const weights = list.map(p => (p.boost ? BOOST_MULTIPLIER : 1));
+      const total = weights.reduce((a,b) => a + b, 0);
+      let r = Math.random() * total;
+      for (let i = 0; i < list.length; i++) {
+        if (r < weights[i]) return list[i];
+        r -= weights[i];
+      }
+      return list[list.length - 1];
     }
 
     // ===== ANIMATION =====
@@ -651,7 +653,6 @@
       btn.disabled = true;
       btn.textContent = "Đang chạy...";
 
-      // Build long sequence
       const loops = 7;
       const sequence = [];
       for (let i = 0; i < loops; i++) sequence.push(...activePrizes);
@@ -659,7 +660,6 @@
       const idxInActive = activePrizes.findIndex(p => p.id === winner.id);
       for (let i = 0; i <= idxInActive; i++) sequence.push(activePrizes[i]);
 
-      // Render sequence
       strip.innerHTML = "";
       sequence.forEach(p => {
         const row = document.createElement("div");
@@ -712,20 +712,9 @@
       if (!window.confetti) return;
       const duration = 1200;
       const end = Date.now() + duration;
-
       (function frame() {
-        confetti({
-          particleCount: 5,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 }
-        });
-        confetti({
-          particleCount: 5,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 }
-        });
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
         if (Date.now() < end) requestAnimationFrame(frame);
       })();
     }
@@ -757,7 +746,8 @@
           label: "Giải mới",
           emoji: "✨",
           active: true,
-          displayOnly: false
+          displayOnly: false,
+          boost: false
         });
         renderSettingsItems();
       });
@@ -818,8 +808,9 @@
           const side = document.createElement("div");
           side.className = "settings-checkbox-row";
           side.innerHTML = `
-            <label><input type="checkbox" data-field="active" ${p.active !== false ? "checked" : ""}> Hiển thị & có thể trúng</label>
-            <label><input type="checkbox" data-field="displayOnly" ${p.displayOnly ? "checked" : ""}> Chỉ hiển thị, không bao giờ trúng</label>
+            <label><input type="checkbox" data-field="active" ${p.active !== false ? "checked" : ""}> Có thể trúng</label>
+            <label><input type="checkbox" data-field="displayOnly" ${p.displayOnly ? "checked" : ""}> Chỉ hiển thị</label>
+            <label><input type="checkbox" data-field="boost" ${p.boost ? "checked" : ""}> Ưu tiên (tăng tỷ lệ)</label>
           `;
 
           const removeBtn = document.createElement("button");
@@ -832,10 +823,10 @@
             renderSettingsItems();
           });
 
-          itemEl.appendChild(main);
-          itemEl.appendChild(side);
-          itemEl.appendChild(removeBtn);
-          container.appendChild(itemEl);
+            itemEl.appendChild(main);
+            itemEl.appendChild(side);
+            itemEl.appendChild(removeBtn);
+            container.appendChild(itemEl);
         });
       }
 
@@ -850,13 +841,15 @@
           const emojiInput = el.querySelector('input[data-field="emoji"]');
           const activeChk = el.querySelector('input[data-field="active"]');
           const onlyChk = el.querySelector('input[data-field="displayOnly"]');
+          const boostChk = el.querySelector('input[data-field="boost"]');
 
           newPrizes.push({
             id,
             label: (labelInput?.value || "").trim() || "Giải thưởng",
             emoji: (emojiInput?.value || "🎁").trim(),
             active: activeChk ? activeChk.checked : true,
-            displayOnly: onlyChk ? onlyChk.checked : false
+            displayOnly: onlyChk ? onlyChk.checked : false,
+            boost: boostChk ? boostChk.checked : false
           });
         });
 
